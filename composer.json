@@ -1,0 +1,42 @@
+{
+    "name": "webignition/http-headers",
+    "description": "Models a collection of HTTP headers",
+    "keywords": ["http", "headers"],
+    "homepage": "https://github.com/webignition/http-headers",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jon Cram",
+            "email": "jon@webignition.net"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "webignition\\HttpHeaders\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "webignition\\HttpHeaders\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "./vendor/bin/phpunit --colors=always",
+        "cs": "./vendor/bin/phpcs src tests --colors --standard=PSR2",
+        "ci": [
+            "@composer cs",
+            "@composer test"
+        ]
+    },
+    "require": {
+        "php": ">=7.2",
+        "webignition/http-cache-control-directives": ">=0.2,<1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7",
+        "squizlabs/php_codesniffer": "^3"
+    },
+    "minimum-stability":"stable",
+    "prefer-stable":true
+}
