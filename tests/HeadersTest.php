@@ -26,15 +26,14 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                 'headersArray' => [],
                 'expectedHeaders' => [],
             ],
-            'all invalid' => [
+            'all invalid direct values' => [
                 'headersArray' => [
                     'boolean' => true,
-                    'array' => [],
                     'object' => (object) [],
                 ],
                 'expectedHeaders' => [],
             ],
-            'all valid' => [
+            'all valid direct values' => [
                 'headersArray' => [
                     'foo' => 'bar',
                 ],
@@ -42,7 +41,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                     'foo' => 'bar',
                 ],
             ],
-            'some valid' => [
+            'some valid direct values' => [
                 'headersArray' => [
                     'foo' => 'bar',
                     'boolean' => true,
@@ -51,6 +50,43 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                 ],
                 'expectedHeaders' => [
                     'foo' => 'bar',
+                    'array' => [],
+                ],
+            ],
+            'all invalid array values' => [
+                'headersArray' => [
+                    'array' => [
+                        true,
+                        [],
+                        (object) [],
+                    ],
+                ],
+                'expectedHeaders' => [
+                    'array' => [],
+                ],
+            ],
+            'repeated field names' => [
+                'headersArray' => [
+                    'vary' => [
+                        'user-agent',
+                        'content-type',
+                    ],
+                    'cache-control' => [
+                        'no-transform, no-store, max-age=30',
+                        'private',
+                        'no-cache=foo, bar',
+                    ],
+                ],
+                'expectedHeaders' => [
+                    'cache-control' => [
+                        'no-transform, no-store, max-age=30',
+                        'private',
+                        'no-cache=foo, bar',
+                    ],
+                    'vary' => [
+                        'user-agent',
+                        'content-type',
+                    ],
                 ],
             ],
         ];

@@ -125,7 +125,11 @@ class Headers
         $filteredHeaders = [];
 
         foreach ($headers as $key => $value) {
-            if (!is_string($value) && !is_int($value)) {
+            if (is_array($value)) {
+                $value = $this->filterScalarArray($value);
+            }
+
+            if (!is_string($value) && !is_int($value) && !is_array($value)) {
                 continue;
             }
 
@@ -136,5 +140,18 @@ class Headers
         }
 
         return $filteredHeaders;
+    }
+
+    private function filterScalarArray(array $array): array
+    {
+        $filteredArray = [];
+
+        foreach ($array as $value) {
+            if (is_string($value) || is_int($value)) {
+                $filteredArray[] = $value;
+            }
+        }
+
+        return $filteredArray;
     }
 }
