@@ -33,14 +33,14 @@ class Headers
         return new Headers(array_merge($this->headers, $this->filter([$key => $value])));
     }
 
-    /**
-     * @param string $key
-     *
-     * @return string|int|null
-     */
-    public function get(string $key)
+    public function get(string $key): array
     {
-        return $this->headers[$key] ?? null;
+        return $this->headers[$key] ?? [];
+    }
+
+    public function getLine(string $key): string
+    {
+        return implode(', ', $this->get($key));
     }
 
     public function toArray(): array
@@ -50,12 +50,14 @@ class Headers
 
     public function getLastModified(): ?\DateTime
     {
-        if (!isset($this->headers['last-modified'])) {
+        $lastModifiedHeaderLine = $this->getLine('last-modified');
+
+        if (empty($lastModifiedHeaderLine)) {
             return null;
         }
 
         try {
-            return new \DateTime($this->headers['last-modified']);
+            return new \DateTime($lastModifiedHeaderLine);
         } catch (\Exception $exception) {
         }
 
@@ -81,12 +83,14 @@ class Headers
      */
     public function getExpires()
     {
-        if (!isset($this->headers['expires'])) {
+        $expiresHeaderLine = $this->getLine('expires');
+
+        if ('' === $expiresHeaderLine) {
             return null;
         }
 
         try {
-            return new \DateTime($this->headers['expires']);
+            return new \DateTime($expiresHeaderLine);
         } catch (\Exception $exception) {
         }
 
@@ -100,7 +104,12 @@ class Headers
             return false;
         }
 
-        $cacheControlDirectives = new HttpCacheControlDirectives($this->get('cache-control') ?? '');
+        $cacheControlDirectives = new HttpCacheControlDirectives('');
+
+        $cacheControlLines = $this->get('cache-control');
+        foreach ($cacheControlLines as $directives) {
+            $cacheControlDirectives->addDirectives($directives);
+        }
 
         $hasCacheControlMaxAge = $cacheControlDirectives->hasDirective(Tokens::MAX_AGE);
         $hasCacheControlSMaxAge = $cacheControlDirectives->hasDirective(Tokens::S_MAXAGE);
@@ -125,8 +134,16 @@ class Headers
         $filteredHeaders = [];
 
         foreach ($headers as $key => $value) {
-            if (!is_string($value) && !is_int($value)) {
+            if (is_array($value)) {
+                $value = $this->filterScalarArray($value);
+            }
+
+            if (!is_string($value) && !is_int($value) && !is_array($value)) {
                 continue;
+            }
+
+            if (is_string($value) || is_int($value)) {
+                $value = [$value];
             }
 
             $key = strtolower($key);
@@ -136,5 +153,18 @@ class Headers
         }
 
         return $filteredHeaders;
+    }
+
+    private function filterScalarArray(array $array): array
+    {
+        $filteredArray = [];
+
+        foreach ($array as $value) {
+            if (is_string($value) || is_int($value)) {
+                $filteredArray[] = $value;
+            }
+        }
+
+        return $filteredArray;
     }
 }

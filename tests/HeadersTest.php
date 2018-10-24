@@ -26,23 +26,24 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                 'headersArray' => [],
                 'expectedHeaders' => [],
             ],
-            'all invalid' => [
+            'all invalid direct values' => [
                 'headersArray' => [
                     'boolean' => true,
-                    'array' => [],
                     'object' => (object) [],
                 ],
                 'expectedHeaders' => [],
             ],
-            'all valid' => [
+            'all valid direct values' => [
                 'headersArray' => [
                     'foo' => 'bar',
                 ],
                 'expectedHeaders' => [
-                    'foo' => 'bar',
+                    'foo' => [
+                        'bar',
+                    ],
                 ],
             ],
-            'some valid' => [
+            'some valid direct values' => [
                 'headersArray' => [
                     'foo' => 'bar',
                     'boolean' => true,
@@ -50,7 +51,46 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                     'object' => (object) [],
                 ],
                 'expectedHeaders' => [
-                    'foo' => 'bar',
+                    'foo' => [
+                        'bar',
+                    ],
+                    'array' => [],
+                ],
+            ],
+            'all invalid array values' => [
+                'headersArray' => [
+                    'array' => [
+                        true,
+                        [],
+                        (object) [],
+                    ],
+                ],
+                'expectedHeaders' => [
+                    'array' => [],
+                ],
+            ],
+            'repeated field names' => [
+                'headersArray' => [
+                    'vary' => [
+                        'user-agent',
+                        'content-type',
+                    ],
+                    'cache-control' => [
+                        'no-transform, no-store, max-age=30',
+                        'private',
+                        'no-cache=foo, bar',
+                    ],
+                ],
+                'expectedHeaders' => [
+                    'cache-control' => [
+                        'no-transform, no-store, max-age=30',
+                        'private',
+                        'no-cache=foo, bar',
+                    ],
+                    'vary' => [
+                        'user-agent',
+                        'content-type',
+                    ],
                 ],
             ],
         ];
@@ -83,7 +123,9 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                 'key' => 'foo',
                 'value' => 'bar',
                 'expectedHeaders' => [
-                    'foo' => 'bar',
+                    'foo' => [
+                        'bar',
+                    ],
                 ],
             ],
             'no existing headers, add invalid' => [
@@ -94,44 +136,64 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
             ],
             'has existing headers, add invalid' => [
                 'existingHeaders' => [
-                    'foo' => 'bar',
+                    'foo' => [
+                        'bar'
+                    ],
                 ],
                 'key' => 'foo',
                 'value' => true,
                 'expectedHeaders' => [
-                    'foo' => 'bar',
+                    'foo' => [
+                        'bar',
+                    ],
                 ],
             ],
             'has existing headers, add new valid' => [
                 'existingHeaders' => [
-                    'foo' => 'bar',
+                    'foo' => [
+                        'bar'
+                    ],
                 ],
                 'key' => 'fizz',
                 'value' => 'buzz',
                 'expectedHeaders' => [
-                    'foo' => 'bar',
-                    'fizz' => 'buzz',
+                    'foo' => [
+                        'bar',
+                    ],
+                    'fizz' => [
+                        'buzz',
+                    ],
                 ],
             ],
             'has existing headers, overwrite' => [
                 'existingHeaders' => [
-                    'foo' => 'bar',
+                    'foo' => [
+                        'bar'
+                    ],
                 ],
                 'key' => 'foo',
                 'value' => 'buzz',
                 'expectedHeaders' => [
-                    'foo' => 'buzz',
+                    'foo' => [
+                        'buzz',
+                    ],
                 ],
             ],
             'headers are sorted' => [
                 'existingHeaders' => [
-                    'zebra' => 'stripey monochrome horse',
+                    'zebra' => [
+                        'stripey monochrome horse',
+                    ],
                 ],
                 'key' => 'ant',
                 'value' => 'tiny insect',
                 'expectedHeaders' => [
-                    'ant' => 'tiny insect',
-                    'zebra' => 'stripey monochrome horse',
+                    'ant' => [
+                        'tiny insect',
+                    ],
+                    'zebra' => [
+                        'stripey monochrome horse',
+                    ],
                 ],
             ],
         ];
@@ -168,14 +230,14 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                     'foo' => 'bar',
                 ],
                 'newHeaders' => [],
-                'expectedHash' => '9bb58f26192e4ba00f01e2e7b136bbd8',
+                'expectedHash' => '29554df72d6ffe88f473752f883e1ff1',
             ],
             'no existing headers, has new headers' => [
                 'existingHeaders' => [],
                 'newHeaders' => [
                     'foo' => 'bar',
                 ],
-                'expectedHash' => '9bb58f26192e4ba00f01e2e7b136bbd8',
+                'expectedHash' => '29554df72d6ffe88f473752f883e1ff1',
             ],
             'has existing headers, has new headers' => [
                 'existingHeaders' => [
@@ -184,7 +246,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                 'newHeaders' => [
                     'fizz' => 'buzz',
                 ],
-                'expectedHash' => '9ec0f73790c61c71905e8a3dc7dacbcc',
+                'expectedHash' => '70fb3fd62dda4d92cfab8de567fdd7f6',
             ],
             'add order does not affect hash' => [
                 'existingHeaders' => [
@@ -193,7 +255,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                 'newHeaders' => [
                     'foo' => 'bar',
                 ],
-                'expectedHash' => '9ec0f73790c61c71905e8a3dc7dacbcc',
+                'expectedHash' => '70fb3fd62dda4d92cfab8de567fdd7f6',
             ],
         ];
     }
@@ -203,11 +265,33 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
         $headers = new Headers([
             'a' => 1,
             'foo' => 'bar',
+            'fizz' => [
+                'buzz1',
+                'buzz2',
+            ],
         ]);
 
-        $this->assertSame(1, $headers->get('a'));
-        $this->assertSame('bar', $headers->get('foo'));
-        $this->assertNull($headers->get('not-set'));
+        $this->assertSame([1], $headers->get('a'));
+        $this->assertSame(['bar'], $headers->get('foo'));
+        $this->assertSame(['buzz1', 'buzz2'], $headers->get('fizz'));
+        $this->assertSame([], $headers->get('not-set'));
+    }
+
+    public function testGetLine()
+    {
+        $headers = new Headers([
+            'a' => 1,
+            'foo' => 'bar',
+            'fizz' => [
+                'buzz1',
+                'buzz2',
+            ],
+        ]);
+
+        $this->assertSame('1', $headers->getLine('a'));
+        $this->assertSame('bar', $headers->getLine('foo'));
+        $this->assertSame('buzz1, buzz2', $headers->getLine('fizz'));
+        $this->assertSame('', $headers->getLine('not-set'));
     }
 
     /**
