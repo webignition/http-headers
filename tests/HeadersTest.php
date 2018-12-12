@@ -3,6 +3,8 @@
 namespace webignition\HttpHeaders\Tests;
 
 use webignition\HttpHeaders\Headers;
+use webignition\InternetMediaType\InternetMediaType;
+use webignition\InternetMediaType\Parameter\Parameter;
 
 class HeadersTest extends \PHPUnit\Framework\TestCase
 {
@@ -502,5 +504,46 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
         ]);
 
         $this->assertFalse($headers->hasExpired());
+    }
+
+    /**
+     * @dataProvider getContentTypeDataProvider
+     *
+     * @param Headers $headers
+     * @param InternetMediaType|null $expectedContentType
+     */
+    public function testGetContentType(Headers $headers, ?InternetMediaType $expectedContentType)
+    {
+        $contentType = $headers->getContentType();
+
+        if ($expectedContentType) {
+            $this->assertEquals((string) $expectedContentType, (string) $contentType);
+        } else {
+            $this->assertNull($contentType);
+        }
+    }
+
+    public function getContentTypeDataProvider(): array
+    {
+        return [
+            'no content type' => [
+                'headers' => new Headers(),
+                'expectedContentType' => null,
+            ],
+            'unparseable content tyoe' => [
+                'headers' => new Headers([
+                    'content-type' => 'text/h t m l',
+                ]),
+                'expectedContentType' => null,
+            ],
+            'valid content type' => [
+                'headers' => new Headers([
+                    'content-type' => 'text/html; charset=utf-8',
+                ]),
+                'expectedContentType' => new InternetMediaType('text', 'html', [
+                    new Parameter('charset', 'utf-8'),
+                ])
+            ],
+        ];
     }
 }

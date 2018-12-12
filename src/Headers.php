@@ -4,6 +4,11 @@ namespace webignition\HttpHeaders;
 
 use webignition\HttpCacheControlDirectives\HttpCacheControlDirectives;
 use webignition\HttpCacheControlDirectives\Tokens;
+use webignition\InternetMediaType\InternetMediaType;
+use webignition\InternetMediaType\Parameter\Parser\AttributeParserException;
+use webignition\InternetMediaType\Parser\Parser as InternetMediaTypeParser;
+use webignition\InternetMediaType\Parser\SubtypeParserException;
+use webignition\InternetMediaType\Parser\TypeParserException;
 
 class Headers
 {
@@ -12,9 +17,15 @@ class Headers
      */
     private $headers = [];
 
+    /**
+     * @var InternetMediaTypeParser
+     */
+    private $internetMediaTypeParser;
+
     public function __construct(array $headers = [])
     {
         $this->headers = $this->filter($headers);
+        $this->internetMediaTypeParser = new InternetMediaTypeParser();
     }
 
     public function createHash(): string
@@ -127,6 +138,23 @@ class Headers
         }
 
         return $now->getTimestamp() >= $expires->getTimestamp();
+    }
+
+    public function getContentType(): ?InternetMediaType
+    {
+        $contentTypeHeaderLine = trim($this->getLine('content-type'));
+        if ('' === $contentTypeHeaderLine) {
+            return null;
+        }
+
+        try {
+            return $this->internetMediaTypeParser->parse($contentTypeHeaderLine);
+        } catch (AttributeParserException $e) {
+        } catch (SubtypeParserException $e) {
+        } catch (TypeParserException $e) {
+        }
+
+        return null;
     }
 
     private function filter(array $headers): array
