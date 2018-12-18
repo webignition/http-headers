@@ -309,6 +309,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function getLastModifiedDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no last-modified' => [
                 'headers' => new Headers(),
@@ -343,6 +344,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function getAgeDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no last-modified, no now' => [
                 'headers' => new Headers(),
@@ -397,6 +399,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function getExpiresDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no expires' => [
                 'headers' => new Headers(),
@@ -437,6 +440,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function hasExpiredDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no expires' => [
                 'headers' => new Headers(),
@@ -543,6 +547,62 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
                 'expectedContentType' => new InternetMediaType('text', 'html', [
                     new Parameter('charset', 'utf-8'),
                 ])
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider withoutHeaderDataProvider
+     *
+     * @param array $headers
+     * @param string $key
+     * @param array $expectedHeaders
+     */
+    public function testWithoutHeader(array $headers, string $key, array $expectedHeaders)
+    {
+        $headersObject = new Headers($headers);
+        $headersObject = $headersObject->withoutHeader($key);
+
+        $this->assertEquals($expectedHeaders, $headersObject->toArray());
+    }
+
+    public function withoutHeaderDataProvider(): array
+    {
+        return [
+            'no headers' => [
+                'headers' => [],
+                'key' => 'foo',
+                'expectedHeaders' => [],
+            ],
+            'has headers, key not present' => [
+                'headers' => [
+                    'fizz' => 'buzz',
+                ],
+                'key' => 'foo',
+                'expectedHeaders' => [
+                    'fizz' => [
+                        'buzz',
+                    ],
+                ],
+            ],
+            'has headers, has key, is then empty' => [
+                'headers' => [
+                    'foo' => 'bar',
+                ],
+                'key' => 'foo',
+                'expectedHeaders' => [],
+            ],
+            'has headers, has key, is not then empty' => [
+                'headers' => [
+                    'foo' => 'bar',
+                    'fizz' => 'buzz',
+                ],
+                'key' => 'foo',
+                'expectedHeaders' => [
+                    'fizz' => [
+                        'buzz',
+                    ],
+                ],
             ],
         ];
     }
