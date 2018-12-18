@@ -546,4 +546,60 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
             ],
         ];
     }
+
+    /**
+     * @dataProvider withoutHeaderDataProvider
+     *
+     * @param array $headers
+     * @param string $key
+     * @param array $expectedHeaders
+     */
+    public function testWithoutHeader(array $headers, string $key, array $expectedHeaders)
+    {
+        $headersObject = new Headers($headers);
+        $headersObject = $headersObject->withoutHeader($key);
+
+        $this->assertEquals($expectedHeaders, $headersObject->toArray());
+    }
+
+    public function withoutHeaderDataProvider(): array
+    {
+        return [
+            'no headers' => [
+                'headers' => [],
+                'key' => 'foo',
+                'expectedHeaders' => [],
+            ],
+            'has headers, key not present' => [
+                'headers' => [
+                    'fizz' => 'buzz',
+                ],
+                'key' => 'foo',
+                'expectedHeaders' => [
+                    'fizz' => [
+                        'buzz',
+                    ],
+                ],
+            ],
+            'has headers, has key, is then empty' => [
+                'headers' => [
+                    'foo' => 'bar',
+                ],
+                'key' => 'foo',
+                'expectedHeaders' => [],
+            ],
+            'has headers, has key, is not then empty' => [
+                'headers' => [
+                    'foo' => 'bar',
+                    'fizz' => 'buzz',
+                ],
+                'key' => 'foo',
+                'expectedHeaders' => [
+                    'fizz' => [
+                        'buzz',
+                    ],
+                ],
+            ],
+        ];
+    }
 }

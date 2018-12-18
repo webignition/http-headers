@@ -44,6 +44,16 @@ class Headers
         return new Headers(array_merge($this->headers, $this->filter([$key => $value])));
     }
 
+    public function withoutHeader(string $key): Headers
+    {
+        $headers = $this->headers;
+        if (array_key_exists($key, $headers)) {
+            unset($headers[$key]);
+        }
+
+        return new Headers($headers);
+    }
+
     public function get(string $key): array
     {
         return $this->headers[$key] ?? [];
