@@ -309,6 +309,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function getLastModifiedDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no last-modified' => [
                 'headers' => new Headers(),
@@ -343,6 +344,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function getAgeDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no last-modified, no now' => [
                 'headers' => new Headers(),
@@ -397,6 +399,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function getExpiresDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no expires' => [
                 'headers' => new Headers(),
@@ -437,6 +440,7 @@ class HeadersTest extends \PHPUnit\Framework\TestCase
 
     public function hasExpiredDataProvider(): array
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return [
             'no expires' => [
                 'headers' => new Headers(),

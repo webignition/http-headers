@@ -93,6 +93,7 @@ class Headers
         }
 
         if (empty($now)) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $now = new \DateTime();
         }
 
@@ -144,6 +145,7 @@ class Headers
         }
 
         if (empty($now)) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $now = new \DateTime();
         }
 
